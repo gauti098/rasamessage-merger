@@ -1,0 +1,18 @@
+{
+    "id": "e0c8dfc8-36e7-40f3-90dd-8d076aa7f715",
+    "version": "0.0.1",
+    "requiredApiVersion": "^1.19.0",
+    "iconFile": "icon.png",
+    "author": {
+        "name": "nsl@gmail.com",
+        "homepage": "nslhub",
+        "support": "nsl@gmail.com"
+    },
+    "name": "nslhub",
+    "nameSlug": "nslhub",
+    "classFile": "NslhubApp.ts",
+    "description": "nslhub connector to bot",
+    "implements": [
+        "IPostMessageSent"
+    ]
+}
