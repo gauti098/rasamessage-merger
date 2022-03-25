@@ -33,9 +33,9 @@ export class ExecuteLivechatBlockActionHandler {
             if (!username || NslhubBotUsername !== username) {
                 return this.context.getInteractionResponder().successResponse();
             }
-            // if (!username || IdeaBotUsername !== username) {
-            //     return this.context.getInteractionResponder().successResponse();
-            // }
+            if (!username || IdeaBotUsername !== username) {
+                return this.context.getInteractionResponder().successResponse();
+            }
 
             
 

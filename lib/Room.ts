@@ -6,6 +6,7 @@ import { Logs } from '../enum/Logs';
 import { createMessage, createMessage1 } from './Message';
 import { getAppSettingValue } from './Setting';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { appendFile } from 'fs';
 
 export const updateRoomCustomFields = async (rid: string, data: any, read: IRead,  modify: IModify): Promise<any> => {
     if (!rid) {
@@ -15,7 +16,6 @@ export const updateRoomCustomFields = async (rid: string, data: any, read: IRead
     if (!room) { throw new Error(`Invalid room id ${rid}`); }
 
     const botUserName = await getAppSettingValue(read, AppSetting.NslhubBotUsername);
-    // const botUserName = await getAppSettingValue(read, AppSetting.IdeaBotUsername);
     if (!botUserName) { throw new Error('The Bot Username setting is not defined.'); }
 
     const user = await read.getUserReader().getByUsername(botUserName);
@@ -60,116 +60,10 @@ export const performHandover = async (modify: IModify, read: IRead, rid: string,
         currentRoom: room,
     };
 
-
-
-    // // // // if(agentid)
-    // // // // {
-    // const agent = sourceFile.agent;
-    // console.log('checking logs in room ts file from export' , agent);
-    // // // // // console.log('before user email checking');
-    // const agentDB: IUser = await read.getUserReader().getById(agent) as IUser;
-    // console.log('agentdb details is', agentDB);
-    // // // livechatTransferData.targetAgent = agentDB;
-    // // let agent = 'kDP83svj8NgPGH5A5';
-
-    // if(agent == '')
-    // {
-    //     createMessage(rid, read, modify, { text:'transferring your call to Department'});
-    //     const targetDepartment = targetDepartmentName || await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
-    //     if (!targetDepartment) {
-    //         throw new Error(Logs.INVALID_DEPARTMENT_NAME_IN_BOTH_SETTING_AND_REQUEST);
-    //     }
-
-    //     const departmentDB: IDepartment = await read.getLivechatReader().getLivechatDepartmentByIdOrName(targetDepartment) as IDepartment;
-    //     if (!departmentDB) {
-    //         throw new Error(Logs.INVALID_DEPARTMENT_NAME);
-    //     }
-
-    //     livechatTransferData.targetDepartment = departmentDB.id;
-
-    // }
-    // else if(agentDB)
-    // {
-    //     const agentDB: IUser = await read.getUserReader().getById(agent) as IUser;
-    //     if(agentDB.status == 'offline'){
-    //         createMessage(rid, read, modify, { text:'Agent is offline. I am transferring your call to Department'});
-    //         const targetDepartment = targetDepartmentName || await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
-    //         if (!targetDepartment) {
-    //             throw new Error(Logs.INVALID_DEPARTMENT_NAME_IN_BOTH_SETTING_AND_REQUEST);
-    //         }
-
-    //         const departmentDB: IDepartment = await read.getLivechatReader().getLivechatDepartmentByIdOrName(targetDepartment) as IDepartment;
-    //         if (!departmentDB) {
-    //             throw new Error(Logs.INVALID_DEPARTMENT_NAME);
-    //         }
-    //         console.log('when agent is offline');
-    //         livechatTransferData.targetDepartment = departmentDB.id;
-    //         console.log('when agent is offline then handover not happening', agentDB);
-
-
-    //     }
-    //     else if(agentDB.status)
-    //     {
-    //         createMessage(rid, read, modify, { text:'handling over to agent'});
-    //         console.log('when agent is online');
-    //         livechatTransferData.targetAgent = agentDB;
-    //         console.log('when agent is online then handover happening', agentDB);
-
-
-    //     }
-
-    // }
-    // else
-    // {
-    //     createMessage(rid, read, modify, { text:'transferring your call to Department'});
-    //     const targetDepartment = targetDepartmentName || await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
-    //     if (!targetDepartment) {
-    //         throw new Error(Logs.INVALID_DEPARTMENT_NAME_IN_BOTH_SETTING_AND_REQUEST);
-    //     }
-
-    //     const departmentDB: IDepartment = await read.getLivechatReader().getLivechatDepartmentByIdOrName(targetDepartment) as IDepartment;
-    //     if (!departmentDB) {
-    //         throw new Error(Logs.INVALID_DEPARTMENT_NAME);
-    //     }
-
-    //     livechatTransferData.targetDepartment = departmentDB.id;
-
-
-    // }
-
-    // console.log('handovring trying');
-    // const agentDB: IUser = await read.getUserReader().getById('hr3og6oWj2joc8q3i') as IUser;
-    // console.log('agentdb  status checking');
-    // console.log(agentDB.status);
-    // if(agentDB.status !== 'online'){
-    //     createMessage(rid, read, modify, { text:'Agent is offline. I am transferring your call to Department'});
-    //     const targetDepartment = targetDepartmentName || await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
-    //     if (!targetDepartment) {
-    //         throw new Error(Logs.INVALID_DEPARTMENT_NAME_IN_BOTH_SETTING_AND_REQUEST);
-    //     }
-
-    //     const departmentDB: IDepartment = await read.getLivechatReader().getLivechatDepartmentByIdOrName(targetDepartment) as IDepartment;
-    //     if (!departmentDB) {
-    //         throw new Error(Logs.INVALID_DEPARTMENT_NAME);
-    //     }
-    //     console.log('when agent is offline');
-    //     livechatTransferData.targetDepartment = departmentDB.id;
-    //     console.log('when agent is offline then handover not happening', agentDB);
-
-
-    // }
-    // else
-    // {
-    //     createMessage(rid, read, modify, { text:'handling over to agent'});
-    //     console.log('when agent is online');
-    //     livechatTransferData.targetAgent = agentDB;
-    //     console.log('when agent is online then handover happening', agentDB);
-
-
-    // }
     if(targetAgentName != null)
     {
         const agentDB: IUser = await read.getUserReader().getById(targetAgentName) as IUser;
+        console.log('agent db is', agentDB);
         if(agentDB.status == 'offline'){
             createMessage1(rid, read, modify, { text:'Agent is offline. I am transferring your call to Department'},false);
             const targetDepartment = targetDepartmentName || await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
@@ -200,23 +94,21 @@ export const performHandover = async (modify: IModify, read: IRead, rid: string,
     }
     else if(targetAgentName == null)
     {
-        createMessage(rid, read, modify, { text:'transferring your call to Department'},false);
+        createMessage1(rid, read, modify, { text:'transferring your call to Department'},false);
         const targetDepartment = targetDepartmentName || await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
         if (!targetDepartment) {
         throw new Error(Logs.INVALID_DEPARTMENT_NAME_IN_BOTH_SETTING_AND_REQUEST);
         }
-
         const departmentDB: IDepartment = await read.getLivechatReader().getLivechatDepartmentByIdOrName(targetDepartment) as IDepartment;
         if (!departmentDB) {
         throw new Error(Logs.INVALID_DEPARTMENT_NAME);
         }
-
         livechatTransferData.targetDepartment = departmentDB.id;
 
     }
     else
     {
-        createMessage(rid, read, modify, { text:'transferring your call to Department'},false);
+        createMessage1(rid, read, modify, { text:'transferring your call to Department'},false);
         const targetDepartment = targetDepartmentName || await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
         if (!targetDepartment) {
             throw new Error(Logs.INVALID_DEPARTMENT_NAME_IN_BOTH_SETTING_AND_REQUEST);
@@ -226,7 +118,6 @@ export const performHandover = async (modify: IModify, read: IRead, rid: string,
         if (!departmentDB) {
             throw new Error(Logs.INVALID_DEPARTMENT_NAME);
         }
-
         livechatTransferData.targetDepartment = departmentDB.id;
 
 
@@ -239,6 +130,6 @@ export const performHandover = async (modify: IModify, read: IRead, rid: string,
     if (!result) {
         const offlineMessage: string = await getAppSettingValue(read, AppSetting.NslhubServiceUnavailableMessage);
 
-        await createMessage(rid, read, modify, { text: offlineMessage ? offlineMessage : DefaultMessage.DEFAULT_NslhubServiceUnavailableMessage },false);
+        await createMessage1(rid, read, modify, { text: offlineMessage ? offlineMessage : DefaultMessage.DEFAULT_NslhubServiceUnavailableMessage },false);
     }
 };

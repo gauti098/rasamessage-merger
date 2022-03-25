@@ -104,9 +104,9 @@ export const createMessage = async (rid: string, read: IRead,  modify: IModify, 
 
     const room = await read.getRoomReader().getById(rid);
     
-    let bot_name = JSON.parse(JSON.stringify(room)).servedBy.username;
+    let bot_user = JSON.parse(JSON.stringify(room)).servedBy.username;
 
-    const sender = await read.getUserReader().getByUsername('bot_name');
+    const sender = await read.getUserReader().getByUsername('bot_user');
 
     if (!room) {
         this.app.getLogger().error(Logs.INVALID_ROOM_ID);
@@ -131,7 +131,7 @@ export const createMessage = async (rid: string, read: IRead,  modify: IModify, 
     }
     
     
-    console.log("creating original message text is "+text+"image is "+ message.image + "this video"+ message.video);
+    console.log("creating original message idea is "+text+"image is "+ message.image + "this video"+ message.video);
 
 
     if (text) {
@@ -187,9 +187,9 @@ export const createMessage1 = async (rid: string, read: IRead,  modify: IModify,
     
     const room = await read.getRoomReader().getById(rid);
 
-    let bot_name = JSON.parse(JSON.stringify(room)).servedBy.username;
+    let bot_user = JSON.parse(JSON.stringify(room)).servedBy.username;
 
-    const sender = await read.getUserReader().getByUsername('bot_name');
+    const sender = await read.getUserReader().getByUsername('bot_user');
     
     // if (!sender) {
     //     // this.app.getLogger().error(Logs.INVALID_BOT_USERNAME_SETTING);
@@ -201,7 +201,7 @@ export const createMessage1 = async (rid: string, read: IRead,  modify: IModify,
         this.app.getLogger().error(Logs.INVALID_ROOM_ID);
         return;
     }
-    console.log("createmessage1 is ",message, 'and original room bot', room);
+    console.log("createmessage for idea is ",message);
 
 
     const msg = modify.getCreator().startMessage().setRoom(room).setSender(sender);
