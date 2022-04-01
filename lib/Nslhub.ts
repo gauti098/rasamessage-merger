@@ -13,19 +13,28 @@ import { IDepartment, ILivechatRoom, ILivechatTransferData, IVisitor } from '@ro
 
 
 let agent = null;
-let flag = '';
+let flag = -1;
 let visitor_mail = '';
 let visitor_name = '';
 
 
 export const sendMessage = async (read: IRead, http: IHttp, sender: string, modify: IModify, message: string, app:IApp): Promise<Array<INslhubMessage> | null> => {
     const NslhubServerUrl = await getAppSettingValue(read, AppSetting.NslhubServerUrl);
-    const IdeaServerUrl = await getAppSettingValue(read, AppSetting.IdeaServerUrl);
+    const NslhubBotUsername = await getAppSettingValue(read, AppSetting.NslhubBotUsername);
     if (!NslhubServerUrl) { throw new Error(Logs.INVALID_Nslhub_SERVER_URL_SETTING); }
     const callbackEnabled: boolean = await getAppSettingValue(read, AppSetting.NslhubEnableCallbacks);
     const room = await read.getRoomReader().getById(sender);
     let bot_name = JSON.parse(JSON.stringify(room)).servedBy.username;
     app.getLogger().info('room from user is', room, 'and bot name is', bot_name);
+    for(var i = 0; i <= NslhubBotUsername.split(',').length; i++)
+    {
+        if(NslhubBotUsername.split(',')[i] == bot_name)
+        {
+            flag = i;
+        }
+
+    }
+    app.getLogger().info(NslhubServerUrl.split(',')[flag], 'and bot is', NslhubBotUsername.split(',')[flag]);
 
     const httpRequestContent: IHttpRequest = createHttpRequest(
         { 'Content-Type': Headers.CONTENT_TYPE_JSON},
@@ -34,7 +43,6 @@ export const sendMessage = async (read: IRead, http: IHttp, sender: string, modi
     
 
     );
-    
     if(message == 'handover')
     {
         const httpRequestContent1: IHttpRequest = createHttpRequest({'X-Auth-Token': 'Ztpk0KyqSgxXWSsD22g1dqsOh8IKraiUNOERub7tFAo', 'X-User-Id': 'wyuDAAwN7gN8rnzfu'}, {'timeout': '30000'}, {});
@@ -49,40 +57,19 @@ export const sendMessage = async (read: IRead, http: IHttp, sender: string, modi
         const token_id = Array(visitorInfo);
         const visitorDetails = token_id[0].data.visitor.token;
         app.getLogger().info('visitorDetails is', visitorDetails);
-        // const visitor: IVisitor = (await read.getLivechatReader().getLivechatVisitorByToken(token)) as IVisitor;
-        // const visitor = IVisitor. token;
         const visitor = visitorDetails;
         app.getLogger().info('visitor from room is', visitor);
-        let targetDepartment = '';
-        if(bot_name == 'yantr')
-        {
-          targetDepartment = '3dkpAmKjdLLrh2bZ6';
-        }
-        else if(bot_name == 'idea')
-        {
-          app.getLogger().info('idea lel o');
-          targetDepartment = 'DRc5SjK8eW93khpcy';
-
-        }
-        else{
-            targetDepartment = 'AcZgZSPWaqHNunTxx';
-        }
-        // const targetAgent = 'o4b2M6vNWpbtKRz6B';
+        const targetDepartmentName = await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
+        app.getLogger().info('deppttt is', targetDepartmentName.split(',')[flag]);
+        const targetDepartment = targetDepartmentName.split(',')[flag];
         const targetAgent = null;
         await performHandover(modify, read, sender, visitor, targetDepartment, targetAgent);
 
 
 
     }
-    let WebhookUrl = IdeaServerUrl;
-    if(bot_name == 'yantr')
-    {
-        WebhookUrl = callbackEnabled ? `${NslhubServerUrl}/webhooks/callback/webhook` : `${NslhubServerUrl}/webhooks/rest/webhook`;
-    }
-    else if(bot_name == 'idea')
-    {
-      WebhookUrl = callbackEnabled ? `${NslhubServerUrl}/webhooks/callback/webhook` : `${IdeaServerUrl}/webhooks/rest/webhook`;
-    }
+    
+    const WebhookUrl = callbackEnabled ? `${NslhubServerUrl}/webhooks/callback/webhook` : `${NslhubServerUrl.split(',')[flag]}/webhooks/rest/webhook`;
     const response = await http.post(WebhookUrl, httpRequestContent);
     app.getLogger().info('raw response log', response, 'webhook url is', WebhookUrl);
     if (response.statusCode !== 200) { throw Error(`${ Logs.Nslhub_REST_API_COMMUNICATION_ERROR } ${ response.content }`); }

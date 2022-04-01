@@ -27,15 +27,15 @@ export class ExecuteLivechatBlockActionHandler {
             }
 
             const NslhubBotUsername: string = await getAppSettingValue(this.read, AppSetting.NslhubBotUsername);
-            const IdeaBotUsername: string = await getAppSettingValue(this.read, AppSetting.IdeaBotUsername);
+            // const IdeaBotUsername: string = await getAppSettingValue(this.read, AppSetting.IdeaBotUsername);
             const { servedBy: { username = null } = {}, id: rid } = room as ILivechatRoom;
 
             if (!username || NslhubBotUsername !== username) {
                 return this.context.getInteractionResponder().successResponse();
             }
-            if (!username || IdeaBotUsername !== username) {
-                return this.context.getInteractionResponder().successResponse();
-            }
+            // if (!username || IdeaBotUsername !== username) {
+            //     return this.context.getInteractionResponder().successResponse();
+            // }
 
             
 

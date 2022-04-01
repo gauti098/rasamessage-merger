@@ -9,12 +9,6 @@ export enum AppSetting {
     NslhubEnableCallbacks = 'Nslhub_enable_callbacks',
     NslhubDefaultHandoverDepartment = 'Nslhub_target_handover_department',
     NslhubHideQuickReplies = 'Nslhub_hide_quick_replies',
-    IdeaBotUsername = 'Idea_bot_username',
-    IdeaServerUrl = 'Idea_server_url',
-    IdeaDefaultHandoverDepartment = 'Idea_target_handover_department',
-
-
-
 }
 
 export enum DefaultMessage {
@@ -27,7 +21,7 @@ export const settings: Array<ISetting> = [
     {
         id: AppSetting.NslhubBotUsername,
         public: true,
-        type: SettingType.STRING,
+        type: SettingType.CODE,
         packageValue: '',
         i18nLabel: 'bot_username',
         required: true,
@@ -36,7 +30,7 @@ export const settings: Array<ISetting> = [
     {
         id: AppSetting.NslhubServerUrl,
         public: true,
-        type: SettingType.STRING,
+        type: SettingType.CODE,
         packageValue: '',
         i18nLabel: 'Nslhub_server_url',
         required: true,
@@ -71,7 +65,7 @@ export const settings: Array<ISetting> = [
     {
         id: AppSetting.NslhubDefaultHandoverDepartment,
         public: true,
-        type: SettingType.STRING,
+        type: SettingType.CODE,
         packageValue: '',
         i18nLabel: 'Nslhub_default_handover_department',
         i18nDescription: 'Nslhub_default_handover_department_description',
@@ -105,31 +99,5 @@ export const settings: Array<ISetting> = [
         packageValue: '',
         i18nLabel: 'Nslhub_service_unavailable_message',
         required: false,
-    },
-    {
-        id: AppSetting.IdeaBotUsername,
-        public: true,
-        type: SettingType.STRING,
-        packageValue: '',
-        i18nLabel: 'idea_bot_username',
-        required: true,
-
-    },
-    {
-        id: AppSetting.IdeaServerUrl,
-        public: true,
-        type: SettingType.STRING,
-        packageValue: '',
-        i18nLabel: 'Idea_server_url',
-        required: true,
-    },
-    {
-        id: AppSetting.IdeaDefaultHandoverDepartment,
-        public: true,
-        type: SettingType.STRING,
-        packageValue: '',
-        i18nLabel: 'Idea_default_handover_department',
-        i18nDescription: 'Idea_default_handover_department_description',
-        required: true,
     },
 ];

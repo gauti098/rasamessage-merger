@@ -25,9 +25,9 @@ export class PostMessageSentHandler {
         const { id: rid, type, servedBy, isOpen } = livechatRoom;
 
         const NslhubBotUsername: string = await getAppSettingValue(this.read, AppSetting.NslhubBotUsername);
-        const IdeaBotUsername: string = await getAppSettingValue(this.read, AppSetting.IdeaBotUsername);
-        console.log('livechatRoom details is', livechatRoom);
-
+        // const IdeaBotUsername: string = await getAppSettingValue(this.read, AppSetting.IdeaBotUsername);
+        
+        
         if (!type || type !== RoomType.LIVE_CHAT) {
             return;
         }
@@ -48,9 +48,9 @@ export class PostMessageSentHandler {
         //     return;
         // }
 
-        if (sender.username === IdeaBotUsername) {
-            return;
-        }
+        // if (sender.username === IdeaBotUsername) {
+        //     return;
+        // }
 
         
 
