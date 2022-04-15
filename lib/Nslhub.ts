@@ -12,6 +12,7 @@ import { createMessage } from './Message';
 import { IDepartment, ILivechatRoom, ILivechatTransferData, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 
 
+
 let agent = null;
 let flag = -1;
 let visitor_mail = '';
@@ -39,13 +40,14 @@ export const sendMessage = async (read: IRead, http: IHttp, sender: string, modi
     const httpRequestContent: IHttpRequest = createHttpRequest(
         { 'Content-Type': Headers.CONTENT_TYPE_JSON},
         { sender, message, bot_name},
-        30000000,
+        300000000000000,
+        false
     
-
     );
+    
     if(message == 'handover')
     {
-        const httpRequestContent1: IHttpRequest = createHttpRequest({'X-Auth-Token': 'Ztpk0KyqSgxXWSsD22g1dqsOh8IKraiUNOERub7tFAo', 'X-User-Id': 'wyuDAAwN7gN8rnzfu'}, {'timeout': '30000'}, {});
+        const httpRequestContent1: IHttpRequest = createHttpRequest({'X-Auth-Token': 'Ztpk0KyqSgxXWSsD22g1dqsOh8IKraiUNOERub7tFAo', 'X-User-Id': 'wyuDAAwN7gN8rnzfu'}, {'timeout': '30000'}, {}, false);
         const result = await http.get(`http://localhost:3000/api/v1/rooms.info?roomId=${sender}`, httpRequestContent1);
         const visitor1 = Array(result);
         const visitor_id = visitor1[0].data.room.v._id;
@@ -60,7 +62,7 @@ export const sendMessage = async (read: IRead, http: IHttp, sender: string, modi
         const visitor = visitorDetails;
         app.getLogger().info('visitor from room is', visitor);
         const targetDepartmentName = await getAppSettingValue(read, AppSetting.NslhubDefaultHandoverDepartment);
-        app.getLogger().info('deppttt is', targetDepartmentName.split(',')[flag]);
+        app.getLogger().info('department is', targetDepartmentName.split(',')[flag]);
         const targetDepartment = targetDepartmentName.split(',')[flag];
         const targetAgent = null;
         await performHandover(modify, read, sender, visitor, targetDepartment, targetAgent);
@@ -89,42 +91,79 @@ export const sendMessage = async (read: IRead, http: IHttp, sender: string, modi
 
 export const parseNslhubResponse = (response: any, app:IApp): Array<INslhubMessage> => {
     if (!response) { throw new Error(Logs.INVALID_RESPONSE_FROM_Nslhub_CONTENT_UNDEFINED); }
-    app.getLogger().info("response", response);
-
+    app.getLogger().info("response lenght is ", response.length,'just check');
     const messages: Array<INslhubMessage> = [];
+    var text: string = " ";
+    let recipient_id = " ";
     let image = "no";
     let video = "no";
+    // let newval = Map<string, string>;
     let quickReply = {};
-    if(response.length==2 && response[1].hasOwnProperty('buttons'))
-    {
-        quickReply = response[1];
-    }
-    if(response.length==3 && response[1].hasOwnProperty('image'))
-    {
-        image = response[1].image;
+    // if(response.length==2 && response[1].hasOwnProperty('buttons'))
+    // {
+    //     quickReply = response[1];
+    // }
+    // if(response.length==3 && response[1].hasOwnProperty('image'))
+    // {
+    //     image = response[1].image;
         
-    }
-    if(response.length==2 && response[1].hasOwnProperty('image'))
-    {
-        image = response[1].image;
+    // }
+    // if(response.length==2 && response[1].hasOwnProperty('image'))
+    // {
+    //     image = response[1].image;
         
-    }
-    if(response.length==2 && response[1].hasOwnProperty('custom'))
-    {
-        video = response[1].custom.attachment.payload.src;
-    }
-    if(response.length==3 && response[2].hasOwnProperty('custom'))
-    {
-        video = response[2].custom.attachment.payload.src;
-    }
+    // }
+    // if(response.length==2 && response[1].hasOwnProperty('custom'))
+    // {
+    //     // video = response[1].custom.attachment.payload.src;
+    //     image = response[1].custom.data[0].image;
+    // }
+    // if(response.length==3 && response[2].hasOwnProperty('custom'))
+    // {
+    //     video = response[2].custom.attachment.payload.src;
+    // }
     let isfaq = "no";
-    if(response[0].hasOwnProperty('isFaqOrAtq'))
-    {
-        isfaq = "yes";
+    // if(response[0].hasOwnProperty('isFaqOrAtq'))
+    // {
+    //     isfaq = "yes";
+    // }
+    // #######################################
+    let response_length = response.length;
+    for(var i =0; i < response_length; i++)
+    {    
+        if(response[i].hasOwnProperty('text') == true && response[i].hasOwnProperty('buttons') == false)
+        {
+            text = response[i].text
+            app.getLogger().info('hm text han me nhui hai');
+
+            
+        }
+        if(response[i].hasOwnProperty('text') == true && response[i].hasOwnProperty('buttons') == true)
+        {
+            quickReply = response[i];
+            app.getLogger().info('hm is me nhui hai');
+        }
+        if(response[i].hasOwnProperty('text') == false && response[i].hasOwnProperty('buttons') == true)
+        {
+            quickReply = response[i];
+            app.getLogger().info('hm buttone nr me nhui hai');
+
+
+        }
+        if(response[i].hasOwnProperty('custom') == true)
+        {
+            text =  JSON.stringify(response[i].custom.data[0]);
+            app.getLogger().info('image me hun bhai');
+        }
+        
+        
+        
+        
+
     }
     let m: INslhubMessage = {
-        message: response[0].text,
-        sessionId: response[0].recipient_id,
+        message: text,
+        sessionId: recipient_id,
         isFaqOrAtq: isfaq,
         image,
         video,
@@ -136,18 +175,7 @@ export const parseNslhubResponse = (response: any, app:IApp): Array<INslhubMessa
     messages.push(m);
     return messages;
 
-    // app.getLogger().info("response is", response);
-    // response.forEach((message) => {
-    //     app.getLogger().info('push message', message);
-    //     // messages.push(parseSingleNslhubMessage(message, app));
-        
-
-
-
-    // });
-    // app.getLogger().info('push parse message', messages);
-    
-    // return messages;
+   
 };
 
 
@@ -174,6 +202,7 @@ export const parseSingleNslhubMessage = (message: any, app: IApp): INslhubMessag
             sessionId: recipient_id,
             image: image,
             video: video,
+            // newvalues: " ",
             isFaqOrAtq: isFaqOrAtq,
             quickReplies,
 
@@ -211,6 +240,7 @@ export const parseSingleNslhubMessage = (message: any, app: IApp): INslhubMessag
             sessionId: recipient_id,
             image: image,
             video: video,
+            // newvalues: " ",
             isFaqOrAtq: isFaqOrAtq,
             quickReplies,
 

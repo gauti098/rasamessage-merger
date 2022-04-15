@@ -31,7 +31,7 @@ export const createNslhubMessage = async (rid: string, read: IRead,  modify: IMo
         // const { text, quickReplies }  = {text: NslhubMessage.quickReplies["text"], quickReplies: [{title: NslhubMessage.quickReplies["buttons"][0].title, payload: NslhubMessage.quickReplies["buttons"][0].payload }]} as INslhubQuickReplies; 
         const { text, quickReplies }  = {text: NslhubMessage.quickReplies["text"], quickReplies: value } as INslhubQuickReplies; 
         
-        // console.log("nsl qr "+text+" "+JSON.stringify(quickReplies) ,"nsl message is"+ JSON.stringify(NslhubMessage));
+        console.log("nsl qr "+text+"and quickrs "+JSON.stringify(quickReplies) ,"nsl message is"+ JSON.stringify(NslhubMessage));
         if (text && quickReplies) {
         const elements: Array<IButtonElement> = quickReplies.map((payload: INslhubQuickReply) => ({
             type: BlockElementType.BUTTON,
@@ -47,7 +47,23 @@ export const createNslhubMessage = async (rid: string, read: IRead,  modify: IMo
         await createMessage1(rid, read, modify, { text: msg1 },isFaqOrAtq2);
         await createMessage1(rid, read, modify, { text },isFaqOrAtq2);
         await createMessage1(rid, read, modify, { actionsBlock },isFaqOrAtq2);
-    }
+        }
+        else if (quickReplies) {
+        const elements: Array<IButtonElement> = quickReplies.map((payload: INslhubQuickReply) => ({
+            type: BlockElementType.BUTTON,
+            text: {
+                type: TextObjectType.PLAINTEXT,
+                text: payload.title,
+            },
+            value: payload.payload,
+            actionId: uuid(),
+        } as IButtonElement));
+
+        const actionsBlock: IActionsBlock = { type: BlockType.ACTIONS, elements };
+        await createMessage1(rid, read, modify, { text: msg1 },isFaqOrAtq2);
+        await createMessage1(rid, read, modify, { text },isFaqOrAtq2);
+        await createMessage1(rid, read, modify, { actionsBlock },isFaqOrAtq2);
+        }
     }
     else
     {
@@ -129,6 +145,11 @@ export const createMessage = async (rid: string, read: IRead,  modify: IModify, 
         const videoAttachment: IMessageAttachment = {type: "video", videoUrl: message.video};
         msg.addAttachment(videoAttachment);
     }
+    // if(message.newvalues != " ")
+    // {
+    //     const newvaluesAttachment: IMessageAttachment = {type: 'string', newvaluesurl: message.newvalues};
+    //     msg.addAttachment(newvaluesAttachment);
+    // }
     
     
     console.log("creating original message idea is "+text+"image is "+ message.image + "this video"+ message.video);

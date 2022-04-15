@@ -1,5 +1,6 @@
 export interface INslhubMessage {
-    message: string | INslhubQuickReplies | INslhubImage | INslhubVideo ;
+    // message: string | INslhubQuickReplies | INslhubImage | INslhubVideo ;
+    message: any | INslhubQuickReplies | INslhubImage | INslhubVideo;
     sessionId: string;
     isFaqOrAtq: string;
     image: string;
@@ -26,6 +27,9 @@ export interface INslhubVideo{
     video: any;
 }
 
+// export interface INslhubnewval{
+//     newval: Map<string, string>;
+// }
 
 // export interface INslhubMessage {
 //     message: string | INslhubQuickReplies ;

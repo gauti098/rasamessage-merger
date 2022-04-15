@@ -1,7 +1,7 @@
 import { HttpStatusCode } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApiResponse } from '@rocket.chat/apps-engine/definition/api';
 
-export const createHttpRequest = (headers, data, timeout) => {
+export const createHttpRequest = (headers, data, timeout, strictSSL) => {
     return {
         headers: {
             ...headers,
@@ -10,6 +10,7 @@ export const createHttpRequest = (headers, data, timeout) => {
             ...data,
         },
         timeout: timeout,
+        strictSSL: false,
     };
 };
 
