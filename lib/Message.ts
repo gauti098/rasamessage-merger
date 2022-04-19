@@ -23,15 +23,15 @@ export const createNslhubMessage = async (rid: string, read: IRead,  modify: IMo
     if(NslhubMessage.quickReplies.hasOwnProperty('buttons'))
     {
         let title1 = NslhubMessage.quickReplies;
-        console.log("title is "+JSON.stringify(title1)+" type of title "+typeof(title1));
-        const msg1 = NslhubMessage.message;
+        console.log("title is "+JSON.stringify(title1)+" type of title "+JSON.stringify(NslhubMessage));
+        // const msg1 = NslhubMessage.message;
         const value = NslhubMessage.quickReplies["buttons"];
         console.log("value is  "+JSON.stringify(value));
-        console.log("original message is "+msg1);
+        // console.log("original message is "+msg1);
         // const { text, quickReplies }  = {text: NslhubMessage.quickReplies["text"], quickReplies: [{title: NslhubMessage.quickReplies["buttons"][0].title, payload: NslhubMessage.quickReplies["buttons"][0].payload }]} as INslhubQuickReplies; 
         const { text, quickReplies }  = {text: NslhubMessage.quickReplies["text"], quickReplies: value } as INslhubQuickReplies; 
         
-        console.log("nsl qr "+text+"and quickrs "+JSON.stringify(quickReplies) ,"nsl message is"+ JSON.stringify(NslhubMessage));
+        console.log("nsl qr "+text+"and quickrs "+JSON.stringify(quickReplies));
         if (text && quickReplies) {
         const elements: Array<IButtonElement> = quickReplies.map((payload: INslhubQuickReply) => ({
             type: BlockElementType.BUTTON,
@@ -44,9 +44,9 @@ export const createNslhubMessage = async (rid: string, read: IRead,  modify: IMo
         } as IButtonElement));
 
         const actionsBlock: IActionsBlock = { type: BlockType.ACTIONS, elements };
-        await createMessage1(rid, read, modify, { text: msg1 },isFaqOrAtq2);
+        // await createMessage1(rid, read, modify, { text: msg1 },isFaqOrAtq2);
         await createMessage1(rid, read, modify, { text },isFaqOrAtq2);
-        await createMessage1(rid, read, modify, { actionsBlock },isFaqOrAtq2);
+        await createMessage(rid, read, modify, { actionsBlock },isFaqOrAtq2);
         }
         else if (quickReplies) {
         const elements: Array<IButtonElement> = quickReplies.map((payload: INslhubQuickReply) => ({
@@ -60,16 +60,15 @@ export const createNslhubMessage = async (rid: string, read: IRead,  modify: IMo
         } as IButtonElement));
 
         const actionsBlock: IActionsBlock = { type: BlockType.ACTIONS, elements };
-        await createMessage1(rid, read, modify, { text: msg1 },isFaqOrAtq2);
-        await createMessage1(rid, read, modify, { text },isFaqOrAtq2);
-        await createMessage1(rid, read, modify, { actionsBlock },isFaqOrAtq2);
+        // await createMessage1(rid, read, modify, { text: msg1 },isFaqOrAtq2);
+        // await createMessage1(rid, read, modify, { text },isFaqOrAtq2);
+        await createMessage(rid, read, modify, { actionsBlock },isFaqOrAtq2);
         }
     }
-    else
+    if(NslhubMessage.quickReplies != 'buttons')
     {
         await createMessage(rid, read, modify, NslhubMessage,isFaqOrAtq2);
     }
-    
     // if (text && quickReplies) {
     //     // NslhubMessage is instanceof INslhubQuickReplies
     //     const elements: Array<IButtonElement> = quickReplies.map((payload: INslhubQuickReply) => ({
@@ -105,19 +104,6 @@ export const createMessage = async (rid: string, read: IRead,  modify: IModify, 
     if (!message) {
         return;
     }
-    // const NslbotUserName = await getAppSettingValue(read, AppSetting.NslhubBotUsername);
-    // if (!NslbotUserName) {
-    //     this.app.getLogger().error(Logs.EMPTY_BOT_USERNAME_SETTING);
-    //     return;
-    // }
-
-    // const sender = await read.getUserReader().getByUsername(NslbotUserName);
-    
-    // if (!sender) {
-    //     this.app.getLogger().error(Logs.INVALID_BOT_USERNAME_SETTING);
-    //     return;
-    // }
-
     const room = await read.getRoomReader().getById(rid);
     
     let bot_user = JSON.parse(JSON.stringify(room)).servedBy.username;
@@ -134,6 +120,7 @@ export const createMessage = async (rid: string, read: IRead,  modify: IModify, 
 
 
     const text = message.message;
+    console.log("creating cardcorsel message is "+JSON.stringify(message));
     const actionsBlock = message.actionsBlock;
     if(message.image!="no")
     {
@@ -145,15 +132,62 @@ export const createMessage = async (rid: string, read: IRead,  modify: IModify, 
         const videoAttachment: IMessageAttachment = {type: "video", videoUrl: message.video};
         msg.addAttachment(videoAttachment);
     }
-    // if(message.newvalues != " ")
-    // {
-    //     const newvaluesAttachment: IMessageAttachment = {type: 'string', newvaluesurl: message.newvalues};
-    //     msg.addAttachment(newvaluesAttachment);
-    // }
-    
-    
-    console.log("creating original message idea is "+text+"image is "+ message.image + "this video"+ message.video);
+    if(message.cardsCarousel!="no")
+    {
+        const cardAttachment: IMessageAttachment = {type: "cardsCarousel", text: message.cardsCarousel};
+        msg.addAttachment(cardAttachment);
 
+    }
+        
+    if (text) {
+        msg.setText(text);
+    }
+    if(message.isFaqOrAtq=="yes")
+    {
+        msg.setParseUrls(true);
+    }
+    else
+    {
+        msg.setParseUrls(false);
+
+    }
+   
+    
+    if (actionsBlock) {
+        const { elements } = actionsBlock as IActionsBlock;
+        msg.addBlocks(modify.getCreator().getBlockBuilder().addActionsBlock({ elements }));
+    }
+    
+    return new Promise(async (resolve) => {
+        modify.getCreator().finish(msg)
+        .then((result) => resolve(result))
+        .catch((error) => console.error(error));
+    });
+};
+export const createMessage1 = async (rid: string, read: IRead,  modify: IModify, message: any, isfaqoratq: boolean ): Promise<any> => {
+    if (!message) {
+        return;
+    }
+    const room = await read.getRoomReader().getById(rid);
+
+    let bot_user = JSON.parse(JSON.stringify(room)).servedBy.username;
+
+    const sender = await read.getUserReader().getByUsername('bot_user');
+    
+    if (!room) {
+        this.app.getLogger().error(Logs.INVALID_ROOM_ID);
+        return;
+    }
+    console.log("createmessage for idea dum dba ke is ", message);
+
+
+    const msg = modify.getCreator().startMessage().setRoom(room).setSender(sender);
+
+    // const { text, actionsBlock } = message;
+
+    const text = message.text;
+
+    const actionsBlock = message.actionsBlock;
 
     if (text) {
         msg.setText(text);
@@ -167,86 +201,6 @@ export const createMessage = async (rid: string, read: IRead,  modify: IModify, 
         msg.setParseUrls(false);
 
     }
-    // if(isfaqoratq==true)
-    // {
-    //     msg.setParseUrls(true);
-    // }
-    // else
-    // {
-    //     msg.setParseUrls(false);
-
-    // }
-    
-    // if (actionsBlock) {
-    //     const { elements } = actionsBlock as IActionsBlock;
-    //     msg.addBlocks(modify.getCreator().getBlockBuilder().addActionsBlock({ elements }));
-    // }
-    
-    // if(imageAttachment){
-
-    //     msg.addAttachment(imageAttachment);
-    // }
-
-    // if(videoAttachment){
-    //     msg.addAttachment(videoAttachment);
-    // }
-   
-
-    return new Promise(async (resolve) => {
-        modify.getCreator().finish(msg)
-        .then((result) => resolve(result))
-        .catch((error) => console.error(error));
-    });
-};
-export const createMessage1 = async (rid: string, read: IRead,  modify: IModify, message: any, isfaqoratq: boolean ): Promise<any> => {
-    if (!message) {
-        return;
-    }
-    
-    // const botUserName = await getAppSettingValue(read, AppSetting.NslhubBotUsername);
-
-    
-    const room = await read.getRoomReader().getById(rid);
-
-    let bot_user = JSON.parse(JSON.stringify(room)).servedBy.username;
-
-    const sender = await read.getUserReader().getByUsername('bot_user');
-    
-    // if (!sender) {
-    //     // this.app.getLogger().error(Logs.INVALID_BOT_USERNAME_SETTING);
-    //     console.log(Logs.INVALID_BOT_USERNAME_SETTING);
-    //     return;
-    // }
-
-    if (!room) {
-        this.app.getLogger().error(Logs.INVALID_ROOM_ID);
-        return;
-    }
-    console.log("createmessage for idea is ",message);
-
-
-    const msg = modify.getCreator().startMessage().setRoom(room).setSender(sender);
-
-    // const { text, actionsBlock } = message;
-
-    const text = message.text;
-
-    const actionsBlock = message.actionsBlock;
-    // console.log("action block is",actionsBlock);
-
-    if (text) {
-        msg.setText(text);
-    }
-    if(isfaqoratq==true)
-    {
-        msg.setParseUrls(true);
-    }
-    else
-    {
-        msg.setParseUrls(false);
-
-    }
-
     if (actionsBlock) {
         const { elements } = actionsBlock as IActionsBlock;
         msg.addBlocks(modify.getCreator().getBlockBuilder().addActionsBlock({ elements }));
